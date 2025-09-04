@@ -3,26 +3,6 @@ const defaultUsers = [
   { firstName: "Madina", lastName: "Karimova", email: "madina@email.com", password: "password" },
   { firstName: "Bobur", lastName: "Rahimov", email: "bobur@email.com", password: "qwerty" }
 ];
-
-const STORAGE_KEY = 'users_db';
-function loadUsers() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultUsers));
-    return [...defaultUsers];
-  }
-  try {
-    return JSON.parse(saved) || [...defaultUsers];
-  } catch (e) {
-    console.warn('Users parse error', e);
-    return [...defaultUsers];
-  }
-}
-function saveUsers(arr) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-}
-
-let users = loadUsers();
 function validateEmail(email) {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(String(email).toLowerCase());
@@ -36,7 +16,7 @@ function validatePassword(password) {
 function showFieldError(inputEl, message) {
   if (!inputEl) return;
   inputEl.classList.add('error');
-  const msgEl = document.getElementById(inputEl.id + 'Error');
+  const msgEl = document.getElementAById(inputEl.id + 'Error');
   if (msgEl) {
     msgEl.textContent = message;
     msgEl.style.display = 'block';
@@ -51,7 +31,6 @@ function clearFieldError(inputEl) {
     msgEl.style.display = 'none';
   }
 }
-
 function showLoading(button) {
   if (!button) return;
   button.dataset._text = button.innerHTML;
@@ -63,7 +42,6 @@ function hideLoading(button) {
   button.innerHTML = button.dataset._text || 'OK';
   button.disabled = false;
 }
-
 function showSuccessMessage(message) {
   const alertDiv = document.createElement('div');
   alertDiv.className = 'alert success';
@@ -77,6 +55,45 @@ function showErrorMessage(message) {
   alertDiv.textContent = message;
   document.getElementById('alerts').prepend(alertDiv);
   setTimeout(() => alertDiv.remove(), 5000);
+}
+async function signupAPI(userData) {
+  try {
+    const response = await fetch('https://682f107d746f8ca4a47fa71c.mockapi.io/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showSuccessMessage("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
+    } else {
+      showErrorMessage(data.message || "Xatolik yuz berdi");
+    }
+  } catch (error) {
+    showErrorMessage("Server bilan bog'lanishda xatolik");
+  }
+}
+
+async function loginAPI(credentials) {
+  try {
+    const response = await fetch('https://682f107d746f8ca4a47fa71c.mockapi.io/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showSuccessMessage("Muvaffaqiyatli kirdingiz!");
+    } else {
+      showErrorMessage("Email yoki parol noto'g'ri");
+    }
+  } catch (error) {
+    showErrorMessage("Server bilan bog'lanishda xatolik");
+  }
 }
 const firstNameEl = document.getElementById('firstName');
 const lastNameEl = document.getElementById('lastName');
@@ -115,8 +132,8 @@ if (sEmailEl) {
 }
 
 function validateSignupPasswordFields() {
-  const pwd = sPassEl.value;
-  const conf = cPassEl.value;
+  const pwd = sPassEl?.value || "";
+  const conf = cPassEl?.value || "";
   let ok = true;
 
   if (!validatePassword(pwd)) {
@@ -137,7 +154,6 @@ function validateSignupPasswordFields() {
   }
   return ok;
 }
-
 if (sPassEl) sPassEl.addEventListener('input', validateSignupPasswordFields);
 if (cPassEl) cPassEl.addEventListener('input', validateSignupPasswordFields);
 if (signupForm) {
@@ -169,30 +185,12 @@ if (signupForm) {
       return;
     }
 
-    const exists = users.some(u => u.email.toLowerCase() === email);
-    if (exists) {
-      showFieldError(sEmailEl, "Bu email allaqachon ro'yxatda mavjud");
-      showErrorMessage("Bu email bilan avval ro'yxatdan o'tilgan.");
-      return;
-    }
-
-    const newUser = { firstName, lastName, email, password };
     showLoading(signupBtn);
-    setTimeout(() => {
-      users.push(newUser);
-      saveUsers(users);
-      hideLoading(signupBtn);
-
-      const signupSuccess = document.getElementById('signupSuccess');
-      if (signupSuccess) {
-        signupSuccess.style.display = 'block';
-        signupSuccess.textContent = "Muvaffaqiyatli ro'yxatdan o'tdingiz!";
-      }
-      showSuccessMessage("Ro'yxatdan o'tish muvaffaqiyatli.");
-      signupForm.reset();
-    }, 700);
+    signupAPI({ firstName, lastName, email, password })
+      .finally(() => hideLoading(signupBtn));
   });
 }
+
 if (loginForm) {
   loginForm.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -217,25 +215,9 @@ if (loginForm) {
       return;
     }
 
-    const user = users.find(u => u.email.toLowerCase() === email);
     showLoading(loginBtn);
-    setTimeout(() => {
-      hideLoading(loginBtn);
-      if (!user) {
-        showErrorMessage('Bunday email topilmadi');
-        return;
-      }
-      if (user.password !== password) {
-        showErrorMessage("Email yoki parol noto'g'ri");
-        return;
-      }
-
-      const loginSuccess = document.getElementById('loginSuccess');
-      if (loginSuccess) {
-        loginSuccess.style.display = 'block';
-        loginSuccess.textContent = `Xush kelibsiz, ${user.firstName}!`;
-      }
-      showSuccessMessage('Muvaffaqiyatli kirdingiz!');
-    }, 500);
+    loginAPI({ email, password })
+      .finally(() => hideLoading(loginBtn));
   });
 }
+
