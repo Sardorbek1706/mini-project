@@ -3,18 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login & Signup Forms</title>
+  <title>Signup</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="page">
-    <h1 class="title">Login & Signup</h1>
-
+    <h1 class="title">Ro'yxatdan o'tish</h1>
     <div id="alerts" class="alerts"></div>
 
     <div class="container">
       <div class="form-card">
-        <h2>Ro'yxatdan o'tish</h2>
         <form id="signupForm" novalidate>
           <div class="form-group">
             <label for="firstName">Ism</label>
@@ -49,29 +47,11 @@
           <button type="submit" id="signupBtn">Ro'yxatdan o'tish</button>
           <div class="success-message" id="signupSuccess"></div>
         </form>
-      </div>
-      <div class="form-card">
-        <h2>Tizimga kirish</h2>
-        <form id="loginForm" novalidate>
-          <div class="form-group">
-            <label for="loginEmail">Email</label>
-            <input type="email" id="loginEmail" name="email" required />
-            <div class="error-message" id="loginEmailError"></div>
-          </div>
 
-          <div class="form-group">
-            <label for="loginPassword">Parol</label>
-            <input type="password" id="loginPassword" name="password" required />
-            <div class="error-message" id="loginPasswordError"></div>
-          </div>
-
-          <button type="submit" id="loginBtn">Kirish</button>
-          <div class="success-message" id="loginSuccess"></div>
-        </form>
-
-        <div class="hint">
-          <p>Test uchun: <code>ahmad@email.com</code> / <code>123456</code></p>
-        </div>
+        <p class="switch-page">
+          Allaqachon akkountingiz bormi?
+          <a href="login.html">Kirish</a>
+        </p>
       </div>
     </div>
   </div>
