@@ -16,7 +16,7 @@ function validatePassword(password) {
 function showFieldError(inputEl, message) {
   if (!inputEl) return;
   inputEl.classList.add('error');
-  const msgEl = document.getElementAById(inputEl.id + 'Error');
+  const msgEl = document.getElementById(inputEl.id + 'Error');
   if (msgEl) {
     msgEl.textContent = message;
     msgEl.style.display = 'block';
@@ -63,30 +63,21 @@ async function signupAPI(userData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData)
     });
-
-    const data = await response.json();
-
-    if (data.success) {
+    if (response.ok) {
       showSuccessMessage("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
     } else {
-      showErrorMessage(data.message || "Xatolik yuz berdi");
+      showErrorMessage("Xatolik yuz berdi");
     }
   } catch (error) {
     showErrorMessage("Server bilan bog'lanishda xatolik");
   }
 }
-
 async function loginAPI(credentials) {
   try {
-    const response = await fetch('https://682f107d746f8ca4a47fa71c.mockapi.io/products', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials)
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
+    const response = await fetch('https://682f107d746f8ca4a47fa71c.mockapi.io/products');
+    const users = await response.json();
+    const found = users.find(u => u.email === credentials.email && u.password === credentials.password);
+    if (found) {
       showSuccessMessage("Muvaffaqiyatli kirdingiz!");
     } else {
       showErrorMessage("Email yoki parol noto'g'ri");
@@ -100,10 +91,8 @@ const lastNameEl = document.getElementById('lastName');
 const sEmailEl = document.getElementById('signupEmail');
 const sPassEl = document.getElementById('signupPassword');
 const cPassEl = document.getElementById('confirmPassword');
-
 const signupForm = document.getElementById('signupForm');
 const signupBtn = document.getElementById('signupBtn');
-
 const loginForm = document.getElementById('loginForm');
 const loginBtn = document.getElementById('loginBtn');
 const lEmailEl = document.getElementById('loginEmail');
@@ -119,7 +108,6 @@ const lPassEl = document.getElementById('loginPassword');
     }
   });
 });
-
 if (sEmailEl) {
   sEmailEl.addEventListener('input', function () {
     const val = this.value.trim();
@@ -130,19 +118,16 @@ if (sEmailEl) {
     }
   });
 }
-
 function validateSignupPasswordFields() {
   const pwd = sPassEl?.value || "";
   const conf = cPassEl?.value || "";
   let ok = true;
-
   if (!validatePassword(pwd)) {
     showFieldError(sPassEl, "Parol kamida 6 belgidan iborat bo'lsin");
     ok = false;
   } else {
     clearFieldError(sPassEl);
   }
-
   if (conf.length === 0) {
     showFieldError(cPassEl, 'Parolni tasdiqlang');
     ok = false;
@@ -164,7 +149,6 @@ if (signupForm) {
     const email = sEmailEl.value.trim().toLowerCase();
     const password = sPassEl.value;
     const confirmPassword = cPassEl.value;
-
     let valid = true;
     if (!validateName(firstName)) {
       showFieldError(firstNameEl, 'Ism kamida 2 ta harf');
@@ -179,24 +163,20 @@ if (signupForm) {
       valid = false;
     }
     if (!validateSignupPasswordFields()) valid = false;
-
     if (!valid) {
       showErrorMessage("Iltimos, maydonlarni to'g'ri to'ldiring.");
       return;
     }
-
     showLoading(signupBtn);
     signupAPI({ firstName, lastName, email, password })
       .finally(() => hideLoading(signupBtn));
   });
 }
-
 if (loginForm) {
   loginForm.addEventListener('submit', function (e) {
     e.preventDefault();
     const email = lEmailEl.value.trim().toLowerCase();
     const password = lPassEl.value;
-
     let ok = true;
     if (!validateEmail(email)) {
       showFieldError(lEmailEl, "Email noto'g'ri");
@@ -214,10 +194,8 @@ if (loginForm) {
       showErrorMessage("Login ma'lumotlarini tekshiring.");
       return;
     }
-
     showLoading(loginBtn);
     loginAPI({ email, password })
       .finally(() => hideLoading(loginBtn));
   });
 }
-
